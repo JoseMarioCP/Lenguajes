@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string> 
-#include <fstream>
+#include <fstream> //libreria para poder haceer la lectura y escritura de archivos
+
 #include "cabecera2.h"
 #include "cabecera.h"
 
@@ -10,6 +11,7 @@
 using namespace std;
 
 
+//clase de la cual se crea el arreglo para almacenar los valores de las citas en los archivos
 class Cita
 {
 public:
@@ -17,6 +19,7 @@ public:
 	char idCita;
 	string nombre;
 };
+
 
 void ordenamientoHoras(char id)
 {
@@ -112,7 +115,7 @@ void ordenamientoHoras(char id)
 		}
 		
 	
-		//ABRIENDO EL ARCHIVO PARA ESCRITURA DEPENDIENDO DEL idBarbero		
+		//ABRIENDO EL ARCHIVO PARA ESCRITURA DEPENDIENDO DEL id (parametro)		
 		switch(id)
 		{
 			case '1':
@@ -159,45 +162,83 @@ bool disponibleTurnosHorarios(string hora)
 {	
 
 	const	string primerTurnoEntrada="08:00";
-	const	string primerTurnoSalida="14:00";
+	const	string primerTurnoSalida="13:45";
 		
 	const	string 	SegundoTurnoEntrada="16:00";
-	const	string SegundoTurnoSalida="20:00";
+	const	string SegundoTurnoSalida="19:45";
 
 	
-	bool disponible=true; //controla si esta dentro del rango de servicio
+	bool disponible; //controla si esta dentro del rango de servicio
 
 			
+			
+			//verfica si la hora es mayor o identica a la hora de abrir en la maniaana
 			if(hora.compare(primerTurnoEntrada)==1 || hora.compare(primerTurnoEntrada)==0)
 			{
-				if(hora.compare(primerTurnoSalida)==-1)
+				
+				//verfica si la hora es menor a la hora de cerrar en la maniaana
+				if(hora.compare(primerTurnoSalida)==-1 || hora.compare(primerTurnoSalida)==0)
 				{
 					//cout<<"\ndentro del horario de servicio en la maniana\n";
-						disponible=true;
+					disponible=true;
 				}
 				else
 				{
+						
+					//verfica si la hora es mayor o identica a la hora de abrir en la tarde
 					if(hora.compare(SegundoTurnoEntrada)==1 || hora.compare(SegundoTurnoEntrada)==0)
 					{
-						if(hora.compare(SegundoTurnoSalida)==-1)
+						
+						//verfica si la hora es menor a la hora de cerrar en la tarde
+						if(hora.compare(SegundoTurnoSalida)==-1 || hora.compare(SegundoTurnoSalida)==0)
 						{
 						//	cout<<"\ndentro del horario de servicio en la tarde\n";
 							disponible=true;
 						}else
 						{
-							disponible=false;
+							
+							
+							if(hora.compare("20:00")==-1 && hora.compare(SegundoTurnoSalida)==1)
+							{
+								cout<<"\nLA BARBERIA ESTA POR CERRRAR, ya no se puede registrar citas faltando 15 minutos\n\n";
+								disponible=false;
+							}else
+							{
+								//cout<<"\nfuera del horario de servicio en la tarde\n";
+								cout<<"\n             ------ Fuera de servicio!!  --------\n\n";
+								cout<<"      horarios: MANIANA 08:00 -- 14:00   TARDE 16:00 -- 20:00   \n\n";
+
+								disponible=false;
+							}
+						
+					
 						}	
 					}	
 					else
 					{
-						//cout<<"\nfuera del horario de servicio en la tarde\n";
-						disponible=false;
+						
+							if(hora.compare("14:00")==-1 && hora.compare(primerTurnoSalida)==1)
+							{
+								cout<<"\nLA BARBERIA ESTA POR CERRAR, ya no se puede registrar citas faltando 15 minutos\n\n";
+								disponible=false;
+							}else
+							{
+								//cout<<"\nfuera del horario de servicio en la tarde\n";
+								cout<<"\n               ------ Fuera de servicio!!  --------\n\n";
+								cout<<"      horarios: MANIANA 08:00 -- 14:00   TARDE 16:00 -- 20:00   \n\n";
+
+								disponible=false;
+							}
+		
 					}
 				}
 			}else
 			{
-				//cout<<"\nfuera del horario de servicio en la maniana\n";
-				disponible= false;
+				
+					cout<<"\n                 ------ Fuera de servicio!!  --------\n\n";
+					cout<< "      horarios: MANIANA 08:00 -- 14:00   TARDE 16:00 -- 20:00   \n\n";
+
+					disponible= false;
 						
 			}
 		
@@ -273,7 +314,7 @@ bool asignarBarbero(string hora,string nom)
 				archivo.close();
 				
 				ordenamientoHoras(idBar); //se realiza el ordenamiento de las citas en el archivo
-				cout<<"\n     ------------ REGISTRO EXITOSO con el barbero "<<idBar<<" ------------\n\n";
+				cout<<"\n     ------------ REGISTRO EXITOSO CON EL BARBERO "<<idBar<<" ------------\n\n";
 			
 }
 
@@ -340,10 +381,19 @@ bool disponible(char id,string hora)
 			archivo>>c2[indice].nombre;
 			
 			//se realiza el incremento de los 15 minutos 
+			//false decrementa 15 minutos la hora de la cita
+			//true incrementa 15 
 			citaPrevia=conversion(c2[indice].hora,false);
 			citaFinalizada=conversion(c2[indice].hora,true);
+			
+			
 				
 			//verificndo disponibilidad de las horas ya registradas
+			
+			//-----compare-- -//
+			//es un metodo para comparar que cadena es mayor a otra
+			//en estos casos de compara la hora ingresada con la hora ya registrada
+			
 			if(hora.compare(c2[indice].hora)==0)
 			{
 				//	cout<<" la hora "<<hora<<"  es identica a la hora "<<c2[indice].hora<<"\n";	
@@ -408,20 +458,38 @@ bool disponible(char id,string hora)
 }
 
 
-bool otrosDisponibles(string hora)
+
+//verifica que barberos estan disponibles a la hora ingresada para la cita 
+//y retorna el numero de barberos disponibles
+int otrosDisponibles(string hora)
 {
 	
+	int barberos=0;
+	
 			if(disponible('1',hora)==true)
-				cout<<"\nel barbero 1 esta disponible a esa hora";
-		
+			{
+					cout<<"\nel barbero 1 esta disponible a esa hora";
+				barberos++;
+			}
+			
 			if(disponible('2',hora)==true)
+			{	
 				cout<<"\nel barbero 2 esta disponible a esa hora";
+				barberos++;
+			}
 			
 			if(disponible('3',hora)==true)
+			{
 				cout<<"\nel barbero 3 esta disponible a esa hora";
-			
+				barberos++;
+			}
+				
 			if(disponible('4',hora)==true)
+			{
 				cout<<"\nel barbero 4 esta disponible a esa hora";
+				barberos++;
+			}
+	return barberos;
 }
 
 
@@ -439,13 +507,14 @@ void registrarCita()
 	ofstream archivo;
 	ifstream archivoL;
 	
-	
+	//etiqueta
 	formatoHoras:
-	cout<<"\nintrodusca la hora para la cita en formato de 24 hrs. \nEJEMPLO -- 17:25 -- 06:30 \n\n\nDijite su hora: ";
+		
+	cout<<"\n\nintrodusca la hora para la cita en formato de 24 hrs. \n         EJEMPLO -- 17:25 -- 09:30 \n\n\nDijite su hora: ";
 	cin>>cita.hora;
 		
 			// ---------------- verificando el formato de las horas ---------------------//
-	if(cita.hora.size()<5 || cita.hora.size()>5)
+			if(cita.hora.size()<5 || cita.hora.size()>5)
 			{
 				cout<<"\n------- LA HORA NO ES VALIDA ----------  \n\n" ;
 				goto formatoHoras;
@@ -462,154 +531,177 @@ void registrarCita()
 			
 	
 	//retorna true en caso de estar la hora dentro del rango de servicio de la barberia	
+	//o false en caso de no estar dentro del rango
 	fueraServicio=disponibleTurnosHorarios(cita.hora);
 		
 		
-	if(fueraServicio==true)
+	if(fueraServicio==true)	
 	{
 		
+		//etiqueta
 			barberosDisponibles:
-			otrosDisponibles(cita.hora);
-
-			barbero: 
-			cout<<"\n\nintrodusca con que barbero desea la cita: \n ";
-			cin>>idBarbero;
-			
-			
-			if(idBarbero!='1' && idBarbero!='2' && idBarbero!='3' && idBarbero!='4' &&  idBarbero!='0') 
-			{
-				cout<<"\n      -------------   ese barbero no existe   -----------------\n";
-				goto barbero;
-			
-			}
-			
-			if(idBarbero=='0') //no se especifica con que barbero y se asignara alguno disponible
-			{
-						cin.ignore();
-						cout<<"\n introdusca tu(s) nombre(s): ";
-						getline(cin,cita.nombre);
-						
-						int palabra=0;
-						string reserva1="",reserva2="";
-						while(palabra<cita.nombre.length())
-						{
-							if(cita.nombre.substr(palabra,1)==" ")
-							{
-								reserva1=cita.nombre.substr(0,palabra);
-								//cout<<"primer nombre "<<reserva1<<"\n";
-								reserva2=cita.nombre.substr(palabra+1);
-								//cout<<"cadena de nombre "<<reserva2<<"\n";
-								cita.nombre=reserva1+"-";
-								cita.nombre+=reserva2;
-								break;
-							}
-							palabra++;
-						}
 				
-				asignarBarbero(cita.hora,cita.nombre);
+			// se verifica medieante el valor de retorno si almenos hay un barbero disponible a la hora tecleada 
+			if(otrosDisponibles(cita.hora)>0)	
+			{
+				
+				//barbero:
+				cout<<"\n\nintrodusca con que barbero desea la cita: \n ";
+				cin>>idBarbero;
+				
+				
+				if(idBarbero!='1' && idBarbero!='2' && idBarbero!='3' && idBarbero!='4' &&  idBarbero!='0') 
+				{
+					cout<<"\n      -------------   ESE BARBERO NO EXISTE   -----------------\n\n\n";
+					goto barberosDisponibles;
+				
+				}
+				
+				if(idBarbero=='0') //no se especifica con que barbero y se asignara alguno disponible
+				{
+							cin.ignore();
+							cout<<"\n introdusca tu(s) nombre(s): ";
+							getline(cin,cita.nombre);
+							
+							//se verifica si hay dos nombres para coloca en el espacio en blanco entre los dos un guin (-)
+							int palabra=0;
+							string reserva1="",reserva2="";
+							while(palabra<cita.nombre.length())
+							{
+								if(cita.nombre.substr(palabra,1)==" ")
+								{
+									reserva1=cita.nombre.substr(0,palabra);
+									//cout<<"primer nombre "<<reserva1<<"\n";
+									reserva2=cita.nombre.substr(palabra+1);
+									//cout<<"cadena de nombre "<<reserva2<<"\n";
+									cita.nombre=reserva1+"-";
+									cita.nombre+=reserva2;
+									break;
+								}
+								palabra++;
+							}
+							
+					 //se asigna la cita al primer barbero dispoonible a la hora tecleada
+					asignarBarbero(cita.hora,cita.nombre);
+					
+				}else
+				{
+			
+						if(disponible(idBarbero,cita.hora)==true)
+						{
+								
+							switch(idBarbero)
+							{
+								case '1':
+									archivo.open("archivos/barbero1.txt",ios::app); //ABRIENDO EN ESCRITURA	
+									archivoL.open("archivos/barbero1.txt",ios::in);	//abriendo en lectura
+									
+								break;
+								
+								case '2':
+									archivo.open("archivos/barbero2.txt",ios::app); //ABRIENDO EN ESCRITURA
+									archivoL.open("archivos/barbero2.txt",ios::in); //abriendo en lectura
+									
+								break;
+								
+								case '3':
+									archivo.open("archivos/barbero3.txt",ios::app); //ABRIENDO EN ESCRITURA
+									archivoL.open("archivos/barbero3.txt",ios::in); //abriendo en lectura
+								
+								break;
+								
+								case '4':
+									archivo.open("archivos/barbero4.txt",ios::app); //ABRIENDO EN ESCRITURA
+									archivoL.open("archivos/barbero4.txt",ios::in);	//abriendo en lectura
+									
+								break;	
+							}
+							
+							if(archivo.fail()){cout<<"no se pudo crear el archivo";}
+							
+							
+							while(!archivoL.eof())
+							{
+								//VERIFICANDO E INCREMENTADO EL CONTADOR POR CADA salto de linea en el archivo
+								getline(archivoL,linea);
+								contador++;
+							}
+								
+							//---------------- captura el nombre para agregarlo de manera correcta al archivo--------
+							//se verifica si hay dos nombres para coloca en el espacio en blanco entre los dos un guin (-)
+							cin.ignore();
+							cout<<"\n introdusca tu(s) nombre(s): ";
+							getline(cin,cita.nombre);
+							
+							int palabra=0;
+							string reserva1="",reserva2="";
+							while(palabra<cita.nombre.length())
+							{
+								if(cita.nombre.substr(palabra,1)==" ")
+								{
+									reserva1=cita.nombre.substr(0,palabra);
+									//cout<<"primer nombre "<<reserva1<<"\n";
+									reserva2=cita.nombre.substr(palabra+1);
+									//cout<<"cadena de nombre "<<reserva2<<"\n";
+									cita.nombre=reserva1+"-";
+									cita.nombre+=reserva2;
+									break;
+								}
+								palabra++;
+							}
+							
+							// ------- realizando la escritura en el archivo----------
+							archivo<<contador;
+							archivo<<" ";
+							archivo<<cita.hora;
+							archivo<<" ";
+							archivo<<cita.nombre;
+							archivo<<" ";
+							archivo<<"\n";
+							archivo.close();
+							
+							
+							ordenamientoHoras(idBarbero); // se ordenara las citas en el archivo
+							
+							cout<<"\n     ------------ REGISTRO EXITOSO con el barbero "<<idBarbero<<" ------------\n\n";
+						
+						}else
+						{
+							cout<<"\n ------NO SE PUEDE REGISTRAR - Barbero ocupado seleccione uno de los disponibles!!\n\n";
+							goto barberosDisponibles;
+						}
+							
+				} //barbero elegido por id
 				
 			}else
 			{
-		
-					if(disponible(idBarbero,cita.hora)==true)
-					{
-							
-						switch(idBarbero)
-						{
-							case '1':
-								archivo.open("archivos/barbero1.txt",ios::app); //ABRIENDO EN ESCRITURA	
-								archivoL.open("archivos/barbero1.txt",ios::in);
-								
-							break;
-							
-							case '2':
-								archivo.open("archivos/barbero2.txt",ios::app); //ABRIENDO EN ESCRITURA
-								archivoL.open("archivos/barbero2.txt",ios::in);
-								
-							break;
-							
-							case '3':
-								archivo.open("archivos/barbero3.txt",ios::app); //ABRIENDO EN ESCRITURA
-								archivoL.open("archivos/barbero3.txt",ios::in);
-							
-							break;
-							
-							case '4':
-								archivo.open("archivos/barbero4.txt",ios::app); //ABRIENDO EN ESCRITURA
-								archivoL.open("archivos/barbero4.txt",ios::in);
-								
-							break;	
-						}
-						
-						if(archivo.fail()){cout<<"no se pudo crear el archivo";}
-						
-						
-						while(!archivoL.eof())
-						{
-							//VERIFICANDO E INCREMENTADO EL CONTADOR POR CADA salto de linea en el archivo
-							getline(archivoL,linea);
-							contador++;
-						}
-							
-						//---------------- captura el nombre para agregarlo de manera correcta al archivo--------
-						cin.ignore();
-						cout<<"\n introdusca tu(s) nombre(s): ";
-						getline(cin,cita.nombre);
-						
-						int palabra=0;
-						string reserva1="",reserva2="";
-						while(palabra<cita.nombre.length())
-						{
-							if(cita.nombre.substr(palabra,1)==" ")
-							{
-								reserva1=cita.nombre.substr(0,palabra);
-								//cout<<"primer nombre "<<reserva1<<"\n";
-								reserva2=cita.nombre.substr(palabra+1);
-								//cout<<"cadena de nombre "<<reserva2<<"\n";
-								cita.nombre=reserva1+"-";
-								cita.nombre+=reserva2;
-								break;
-							}
-							palabra++;
-						}
-						
-						// ------- realizando la escritura en el archivo----------
-						archivo<<contador;
-						archivo<<" ";
-						archivo<<cita.hora;
-						archivo<<" ";
-						archivo<<cita.nombre;
-						archivo<<" ";
-						archivo<<"\n";
-						archivo.close();
-						
-						
-						ordenamientoHoras(idBarbero); // se ordenara las citas en el archivo
-						
-						cout<<"\n     ------------ REGISTRO EXITOSO con el barbero "<<idBarbero<<" ------------\n\n";
+				int respuesta=0;
+				cout<<"\n\nLo Sentimos, NO hay ningun barbero disponible a esa hora...";
+				cout<<"\nDesea escoger otra hora?? \n1-Si\n2-No";
+				cin>>respuesta;
+				
+				if(respuesta>0 && respuesta<2)
+				{
+					if(respuesta==1)
+					goto formatoHoras;
 					
-					}else
-					{
-						cout<<"\n ------NO SE PUEDE REGISTRAR - Barbero ocupado seleccione uno de los disponibles!!\n\n";
-						goto barberosDisponibles;
-					}
-						
-			} //barbero elegido por id
+				}
+				
+			}
+			
 			
 	}else
 	{
-		cout<<"\n     ------ Fuera de servicio!!  --------\n\n";
-		cout<<"     horarios matutino --  08:00 a 14:00\n";
-		cout<<"     horarios matutino--  16:00 a 20:00\n\n";
-		if(fueraServicio!=true)
-		{
-			goto formatoHoras;
-		}
+		//	cout<<"\n     ------ Fuera de servicio!!  --------\n\n";
+		//cout<<"     horarios manana --  08:00 a 14:00\n";
+		//cout<<"     horarios  tarde --  16:00 a 20:00\n\n";
+		goto formatoHoras;
+		
 	}
 			
 }
 
-
+//mostrar unicamente la lista de las citas registradas por el id del barbero que se le pasa por parametro
 void mostrarListasDeEspera(char id)
 {
 	string citaFinalizada=""; 	
@@ -624,19 +716,19 @@ void mostrarListasDeEspera(char id)
 	switch(id)
 	{
 		case '1':
-			archivoL.open("archivos/barbero1.txt",ios::app); //ABRIENDO EN ESCRITURA	
+			archivoL.open("archivos/barbero1.txt",ios::app); //ABRIENDO EN lectura	
 			archivoL2.open("archivos/barbero1.txt",ios::app);
 			
 		break;
 		
 		case '2':
-			archivoL.open("archivos/barbero2.txt",ios::app); //ABRIENDO EN ESCRITURA
+			archivoL.open("archivos/barbero2.txt",ios::app); //ABRIENDO EN lectura
 			archivoL2.open("archivos/barbero2.txt",ios::app);
 			
 		break;
 		
 		case '3':
-			archivoL.open("archivos/barbero3.txt",ios::app); //ABRIENDO EN ESCRITURA	
+			archivoL.open("archivos/barbero3.txt",ios::app); //ABRIENDO EN lectura	
 			archivoL2.open("archivos/barbero3.txt",ios::app);
 		
 		break;
@@ -658,7 +750,7 @@ void mostrarListasDeEspera(char id)
 
 	while(!archivoL.eof())
 	{
-		//VERIFICANDO EL DELIMITADOR % E INCREMENTADO EL CONTADOR POR CADA DELIMITADOR ENCONTRADO
+		//VERIFICANDO E INCREMENTADO EL CONTADOR POR CADA cita ENCONTRADO
 		getline(archivoL,linea);
 		contador++;
 	}
@@ -666,8 +758,8 @@ void mostrarListasDeEspera(char id)
 		
 		
 		int indice=0;
-		//cout<<"valor de contador "<<contador<<"\n";
-		Cita c2[contador];
+		
+		Cita c2[contador]; //arreglo que contendra los valores de cada cita 
 		
 	if(contador>1)
 	{
@@ -682,6 +774,7 @@ void mostrarListasDeEspera(char id)
 			archivoL2>>c2[indice].nombre;
 			citaFinalizada=conversion(c2[indice].hora,true);
 	
+			//sacar el nombre si es que tiene dos nombres al encontrar el - (guion) lo remplaza por un espacio en blanco
 			int palabra=0;
 			string reserva1="",reserva2="";
 			while(palabra<c2[indice].nombre.length())
@@ -699,13 +792,13 @@ void mostrarListasDeEspera(char id)
 				palabra++;
 			}
 	
-	
-	
+
 			cout<<"\n  "<<c2[indice].idCita;
 			cout<<"   ----   "<<c2[indice].hora;
 			cout<<"   ----   "<<citaFinalizada;
 			cout<<"   ----   "<<c2[indice].nombre;
 			
+			//si un ha llegado al numeeroo de citas encontradas se incrementa para seguir leyendo
 			if(indice<contador-2)
 			{
 				indice++;
@@ -722,25 +815,30 @@ void mostrarListasDeEspera(char id)
 	}		
 }
 
+
+//mostrar las citas registradas de un barbero o todos , dependiendo de la opcion que teclee el usuario
 void listaEspera()
 {	
 
-	string citaFinalizada=""; 	
+	string citaFinalizada="";  //guarda la hora en que termina una cita	
 		
-	int contador=0; //llevara la cuenta sobre las citas registradas en el archivo
-	ifstream archivoL;
-	ifstream archivoL2;
+	int contador=0;	 //llevara la cuenta sobre las citas registradas en el archivo
+	ifstream archivoL; 		//objeto para realizar la escritura
+	ifstream archivoL2;		//objeto para realizar la escritura
 	
-	string linea; //sacar la linea completa del archivo para buscar el delimitador %
-	char id;
+	string linea; //sacar la linea completa del archivo para buscar el delimitador (salto de linea)
 	
+	char id; //para elegir a un barbero
+	
+	//etiqueta
 	barbero:
+		
 	cout<<"\nintrodusca el id del barbero para ver su lista de espera: ";
 	cin>>id;
 	
 		if(id!='1' && id!='2' && id!='3' && id!='4' && id!='0') 
 			{
-				cout<<"\nese barbero no existe\n";
+				cout<<"\n      -------------   ESE BARBERO NO EXISTE   -----------------\n\n";
 				goto barbero;
 			
 			}
@@ -754,29 +852,29 @@ void listaEspera()
 		mostrarListasDeEspera('4');
 	}else
 	{
-		
+			//----------------- Mostrar los datos del barbero seleccionado--------------
 			switch(id)
 			{
 				case '1':
-					archivoL.open("archivos/barbero1.txt",ios::app); //ABRIENDO EN ESCRITURA	
+					archivoL.open("archivos/barbero1.txt",ios::app); //ABRIENDO EN lectura	
 					archivoL2.open("archivos/barbero1.txt",ios::app);
 					
 				break;
 				
 				case '2':
-					archivoL.open("archivos/barbero2.txt",ios::app); //ABRIENDO EN ESCRITURA
+					archivoL.open("archivos/barbero2.txt",ios::app); //ABRIENDO EN lectura
 					archivoL2.open("archivos/barbero2.txt",ios::app);
 					
 				break;
 				
 				case '3':
-					archivoL.open("archivos/barbero3.txt",ios::app); //ABRIENDO EN ESCRITURA	
+					archivoL.open("archivos/barbero3.txt",ios::app); //ABRIENDO EN Lectura	
 					archivoL2.open("archivos/barbero3.txt",ios::app);
 				
 				break;
 				
 				case '4':
-					archivoL.open("archivos/barbero4.txt",ios::app); //ABRIENDO EN ESCRITURA
+					archivoL.open("archivos/barbero4.txt",ios::app); //ABRIENDO EN lectura
 					archivoL2.open("archivos/barbero4.txt",ios::app);
 				
 				break;
@@ -807,7 +905,7 @@ void listaEspera()
 				//cout<<"valor de contador "<<contador<<"\n";
 				Cita c2[contador];
 				
-			if(contador>1)
+			if(contador>1)	//se verifica si se encontro almenos una cita registrara con el barbero seleccionado
 			{
 				cout<<"\n\n-------------lectura de horario del barbero "<<id<<" --------------------\n\n";
 				cout<<"idCita -- horarioCita -- horaFinalizada -- nombreCliente ";
@@ -820,6 +918,8 @@ void listaEspera()
 					archivoL2>>c2[indice].nombre;
 					citaFinalizada=conversion(c2[indice].hora,true);
 			
+			
+				//sacar el nombre si es que tiene dos nombres al encontrar el - (guion) lo remplaza por un espacio en blanco
 					int palabra=0;
 					string reserva1="",reserva2="";
 					while(palabra<c2[indice].nombre.length())
@@ -844,6 +944,7 @@ void listaEspera()
 					cout<<"   ----   "<<citaFinalizada;
 					cout<<"   ----   "<<c2[indice].nombre;
 					
+					//si un ha llegado al numeeroo de citas encontradas se incrementa para seguir leyendo
 					if(indice<contador-2)
 					{
 						indice++;
@@ -858,7 +959,7 @@ void listaEspera()
 					cout<<"\n\n-------------lectura de horario del barbero "<<id<<" --------------------\n\n";
 					cout<<"           ------  No hay citas ------\n";
 			}
-	}
+	}//mostrar barbero por su id
 			
 }
 

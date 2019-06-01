@@ -12,37 +12,51 @@ using namespace std;
 
 void menu()
 {
-	char id;
-	string horaP;
-	int opcion=0;
-	string menu="\n\n\n\n\n           -------------   REGISTRO DE CITAS PARA BARBERIA   --------------";
-			menu+="\n     ----- horarios maniana 08:00 -- 14:00  ----- horarios tarde 16:00 -- 20:00 -----";
-			menu+="\n\neliga una opcion del menu\n\n     1-registrar cita";
-			menu+="\n     2-ver lista de espera de un barbero\n     3-salir\n\n";
+	
+	char opcion=0;
+	string menu="\n\n\n\n           -------------   REGISTRO DE CITAS PARA BARBERIA   --------------";
+			menu+="\n            horarios: MANIANA 08:00 -- 14:00   TARDE 16:00 -- 20:00   ";
+			menu+="\n\n\nEliga una opcion del menu:\n\n     1-registrar cita";
+			menu+="\n     2-ver lista de espera de un barbero\n     3-salir\n\nOpcion: ";
 	
 	
 	do{
-		cout<<menu;
-		cin>>opcion;
-	switch(opcion)
-	{
-		case 1: 
 		
-		registrarCita();
+		
+		menu:
+			cout<<menu;
+			cin>>opcion;
+			
+			
+				if(opcion!='1' && opcion!='2' && opcion!='3') 
+				{
+					cout<<"\n      -------------   Opcion no valida del menu principal  -----------------\n\n\n";
+					goto menu;
+				
+				}
+			
 	
-		break;
-		
-		case 2: 
-			listaEspera();
-		break;
-		
-		case 3: 
-		cout<<"\nSaliendo\n";
-		
-		break;
-	}
-	
-	}while(opcion!=3);
+			switch(opcion)
+			{
+				case '1': 
+					registrarCita();
+								
+				break;
+									
+				case '2': 
+					listaEspera();
+				break;
+									
+				case '3': 
+					cout<<"\nSaliendo\n";
+									
+				break;
+									
+				default: cout<<"\n\n     ---------- OPCION NO VALIDA DEL MENU PRINCIPAl -----------\n";
+									
+			}
+								
+	}while(opcion!='3');
 		
 }
 

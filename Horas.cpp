@@ -10,6 +10,8 @@ string Hora_numero(string hora)
 {
 	int posicion=0;
 	
+	//se verifica caracter por caracter hasta llegar a los dos puntos (:)
+	//para sacar unicamente las horas
 	for(int i=0;i<hora.size();i++)
 	{
 		if(hora.substr(i,1)==":")
@@ -27,6 +29,8 @@ string Minutos_numero(string hora)
 {
 	int posicion=0;
 	
+	//se verifica caracter por caracter hasta llegar a los dos puntos (:)
+	//para sacar unicamente los minutos
 	for(int i=0;i<hora.size();i++)
 	{
 		if(hora.substr(i,1)==":")
